@@ -4,4 +4,4 @@ clear
 wget https://huggingface.co/tmasikt/ppe-classificator/resolve/main/base.pt
 wget https://huggingface.co/tmasikt/ppe-classificator/resolve/main/extra.pt
 clear
-echo "DONE."
+echo "DONE. #"
