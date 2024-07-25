@@ -37,10 +37,7 @@ class TextDataset(Dataset):
         return label, ret
 
 
-extra_model = TextClassificationModel(20615, 64, 2)
-base_model = TextClassificationModel(444, 60, 67)
-
-ds1 = TextDataset('dataset_extra.csv')
+ds1 = TextDataset('train_dataset_extra.csv')
 ds2 = TextDataset('train_dataset.csv')
 tokenizer = get_tokenizer("basic_english")
 
@@ -57,3 +54,6 @@ text_pipeline_extra = lambda x: vocab1(tokenizer(x))
 vocab2 = build_vocab_from_iterator(yield_tokens(ds2), specials=["<unk>"])
 vocab2.set_default_index(vocab2["<unk>"])
 text_pipeline_base = lambda x: vocab2(tokenizer(x))
+
+extra_model = TextClassificationModel(len(vocab1), 64, 2)
+base_model = TextClassificationModel(len(vocab2), 60, 67)
