@@ -3,6 +3,10 @@ base.pt
 extra.pt
 ./base.pt
 ./extra.pt
+.idea
+.idea/**
+./.idea/**
+./.idea
 
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm,python,macos,jetbrains
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm,python,macos,jetbrains
