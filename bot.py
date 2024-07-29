@@ -85,7 +85,7 @@ async def work_with_file(bot, message, file_name, downloaded_file, work_type):
             return output
         elif file_name.endswith('.xlsx') and work_type == 'use_regexp':
             df = pd.read_excel(BytesIO(downloaded_file))
-            df['Размеры'] = df.iloc[:, 0].apply(lambda x: ''.join(filter(str.isdigit, str(x))))
+            df['Размеры'] = df.iloc[:, 0].apply(lambda x: ' '.join(re.findall(r'\d+', str(x))))
             output = BytesIO()
             df.to_excel(output, index=False)
             output.seek(0)
