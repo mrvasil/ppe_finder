@@ -27,20 +27,21 @@ To run this project using Docker, follow these steps:
    cd ppe_finder
    ```
 
-2. Run the update model script:
-   ```bash
-   chmod +x ./update_model.sh
-   ./update_model.sh
+2. Modify the Dockerfile to include your TELEBOT_API_TOKEN:
+   Open the Dockerfile and replace the placeholder token with your actual Telegram bot token:
+   ```dockerfile
+   RUN export TELEBOT_API_TOKEN='your_actual_token_here'
    ```
+   Replace 'your_actual_token_here' with your real Telegram bot token.
 
 3. Build the Docker image:
    ```bash
    docker build -t ppe_finder .
    ```
 
-4. Run the Docker container, replacing `your_actual_token_here` with your Telegram bot token:
+4. Run the Docker container:
    ```bash
-   docker run -e TELEBOT_API_TOKEN='your_actual_token_here' ppe_finder
+   docker run -d --name ppe_finder ppe_finder
    ```
 
 This will pull the necessary images, install all dependencies, run the update script, and start the bot.
