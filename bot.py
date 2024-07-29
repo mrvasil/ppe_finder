@@ -83,6 +83,14 @@ async def work_with_file(bot, message, file_name, downloaded_file, work_type):
             output.seek(0)
             output.name = "new_table.xlsx"
             return output
+        elif file_name.endswith('.xlsx') and work_type == 'use_regexp':
+            df = pd.read_excel(BytesIO(downloaded_file))
+            df['Размеры'] = df.iloc[:, 0].apply(lambda x: ''.join(filter(str.isdigit, str(x))))
+            output = BytesIO()
+            df.to_excel(output, index=False)
+            output.seek(0)
+            output.name = "sizes_extracted.xlsx"
+            return output
         else:
             await bot.reply_to(message, "Неправильный формат файла")
             return
@@ -95,7 +103,7 @@ async def work_with_file(bot, message, file_name, downloaded_file, work_type):
 async def send_welcome(message):
     markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton("Разделить номенклатуры", callback_data="select_ppe")
-    btn2 = types.InlineKeyboardButton("Достать размеры (не готово)", callback_data="use_regexp")
+    btn2 = types.InlineKeyboardButton("Отделить размеры", callback_data="use_regexp")
     markup.add(btn1, btn2)
     await bot.send_message(message.chat.id, "Выберите опцию:", reply_markup=markup)
 
@@ -104,13 +112,13 @@ async def send_welcome(message):
 async def callback_query(call):
     user_choice[call.from_user.id] = call.data
     await bot.answer_callback_query(call.id, "Опция выбрана: {}".format(call.data))
-    if call.data == "select_ppe":
+    if (call.data == "select_ppe") or (call.data == "use_regexp"):
         with open('example.png', 'rb') as image:
             await bot.send_photo(call.message.chat.id, image)
         await bot.send_message(call.message.chat.id, "*Теперь вы можете отправить файл .xlsx* \n\nФайл должен выглядеть как один столбец, первая строчка которого это его название.", parse_mode='Markdown')
     else:
-        user_choice[call.from_user.id] = False
-        await bot.send_message(call.message.chat.id, "Функция еще не доступна")
+        user_choice[call.from_user.id] = None
+        await bot.send_message(call.message.chat.id, "Функция не доступна")
 
 @bot.message_handler(content_types=['document'])
 async def handle_docs(message):
@@ -120,7 +128,6 @@ async def handle_docs(message):
             downloaded_file = await bot.download_file(file_info.file_path)
             file_name = message.document.file_name
             output_file = await work_with_file(bot, message, file_name, downloaded_file, user_choice[message.from_user.id])
-            print(output_file)
             await bot.send_document(message.chat.id, output_file, caption="Новый файл:")
 
             user_choice[message.from_user.id] = None

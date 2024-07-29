@@ -11,9 +11,5 @@ COPY . .
 RUN pip install --no-cache-dir torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir pytelegrambotapi pandas aiohttp torchtext==0.17.2 openpyxl
 
-# Make the model update script executable and run it
-RUN chmod +x ./update_model.sh
-RUN ./update_model.sh
-
 # Run bot.py when the container launches
 CMD ["python3", "bot.py"]

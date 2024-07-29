@@ -2,7 +2,14 @@
 
 ## About
 
-Something that will help you find the names of Personal Protective Equipment in the general list of purchase items. 
+The bot provides functionality to help classify Personal Protective Equipment (PPE) items from a general list of purchase items. It can process Excel files and provide categorization results directly in Telegram.
+
+
+## Usage
+
+You can interact with this bot on Telegram by searching for [@ppe_find_bot](https://t.me/ppe_find_bot)
+
+
 
 ## Prerequisites
 
@@ -14,12 +21,24 @@ Before you begin, ensure you have met the following requirements:
 
 To run this project using Docker, follow these steps:
 
-1. Build the Docker image:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/mrvasil/ppe_finder.git
+   cd ppe_finder
+   ```
+
+2. Run the update model script:
+   ```bash
+   chmod +x ./update_model.sh
+   ./update_model.sh
+   ```
+
+3. Build the Docker image:
    ```bash
    docker build -t ppe_finder .
    ```
 
-2. Run the Docker container, replacing `your_actual_token_here` with your Telegram bot token:
+4. Run the Docker container, replacing `your_actual_token_here` with your Telegram bot token:
    ```bash
    docker run -e TELEBOT_API_TOKEN='your_actual_token_here' ppe_finder
    ```
