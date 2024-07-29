@@ -3,6 +3,7 @@ from telebot import types, async_telebot
 import asyncio
 import torch
 import re
+import os
 
 import pandas as pd
 import csv
@@ -10,7 +11,7 @@ import random
 from io import BytesIO
 from models import extra_model, base_model, text_pipeline_extra, text_pipeline_base, TextClassificationModel
 
-API_TOKEN = '6928281910:AAE_vQmCivZfB9IEpK3BzuDHmEIv6zzzJr0'
+API_TOKEN = os.getenv('TELEBOT_API_TOKEN')
 bot = async_telebot.AsyncTeleBot(API_TOKEN)
 user_choice = {}
 extra_model.load_state_dict(torch.load("extra.pt"))
