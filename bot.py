@@ -59,20 +59,12 @@ async def work_with_file(bot, message, file_name, downloaded_file, work_type):
                 response_json = response.json()
                 value = response_json.get('response')
                 print(value)
-                for i in value.split("\n"):
-                    if (i == "0") or (i == "0 ") or (i == "1") or (i == "1 "):
-                        a.append(i[0])
-                    elif (i == "") or (i == " ") or (i == "\n"):
-                        aaaaaaaaaaa=1
-                    else:
+                value = ''.join(char for char in value if char in '01')
+                for i in range(len(j)):
+                    try:
+                        a.append(value[i])
+                    except:
                         a.append("-")
-            while len(a) < len(items):
-                a.append("-")
-            while len(a) > len(items):
-                try:
-                    a.pop(a.index("-"))
-                except:
-                    a.pop(-1)
             df['СИЗ'] = a
             output = BytesIO()
             df.to_excel(output, index=False)
