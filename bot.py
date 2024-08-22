@@ -1,31 +1,16 @@
 import telebot
 from telebot import types, async_telebot
 import asyncio
-import torch
 import re
 import os
-
+import requests
 import pandas as pd
-import csv
-import random
 from io import BytesIO
-from models import extra_model, base_model, text_pipeline_extra, text_pipeline_base, TextClassificationModel
 
 API_TOKEN = os.getenv('TELEBOT_API_TOKEN')
 bot = async_telebot.AsyncTeleBot(API_TOKEN)
 user_choice = {}
-extra_model.load_state_dict(torch.load("extra.pt"))
-extra_model.eval()
-base_model.load_state_dict(torch.load("base.pt"))
-base_model.eval()
-extra_model = extra_model.to("cpu")
-base_model = base_model.to("cpu")
-keys = pd.read_csv('keys.csv', sep=';')
-keys_dict = {
-}
 
-for i in keys.iloc:
-    keys_dict.update({i[0]: i[1]})
 
 stopwords = ['разм', 'для', 'под', 'чер', 'леди', 'бел', 'син', 'модель', 'мод']
 
@@ -50,33 +35,44 @@ def remove_blacklisted_words(description):
     return ' '.join(result_words)
 
 
-def predict_extra(text):
-    with torch.no_grad():
-        text = torch.tensor(text_pipeline_extra(clear_string(text)))
-        output = extra_model(text, torch.tensor([0]))
-        return output.argmax(1).item()
-
-
-def predict_base(text):
-    with torch.no_grad():
-        text = torch.tensor(text_pipeline_base(clear_string(text)))
-        output = base_model(text, torch.tensor([0]))
-        return keys_dict[output.argmax(1).item()]
-
 
 async def work_with_file(bot, message, file_name, downloaded_file, work_type):
     try:
         if file_name.endswith('.xlsx') and work_type == 'select_ppe':
             df = pd.read_excel(BytesIO(downloaded_file))
-            a = [
-            ]
-            for j in range(len(df)):
-                to_predict = df.values[j][0]
-                extra_pred = predict_extra(to_predict)
-                if extra_pred == 0:
-                    a.append("-")
-                else:
-                    a.append(predict_base(to_predict))
+            items = df.iloc[:, 0].tolist()
+            chunks = [items[i:i + 100] for i in range(0, len(items), 100)]
+            a = []
+            for j in chunks:
+                #j = "Сапоги\nНоутбук\nКаска защитная;Комбинезон облученный Радио-Протект размер XXL; Очки RUSH затемненные RUSHPPSF"
+                text = ""
+                for i in j:
+                    text += clear_string(i) + "\n"
+                url = "https://18f1-188-94-32-102.ngrok-free.app/api/generate"
+                prompt = f"Дорогой друг, мы с тобой говорим на одном языке - русском! Ты — выдающийся специалист в своей области. За каждую задачу, которую я тебе доверяю, ты получаешь 1000 долларов и 10000 рублей. Важно помнить, что ты не должен допускать ошибок.   Теперь, пожалуйста, определи, является ли следующая номенклатура средством индивидуальной защиты. Отвечай только цифрами: 1 — если элемент является средством индивидуальной защиты, 0 — если не является. Номенклатура: {text}"
+                data = {
+                    "model": "gemma2",
+                    "prompt": prompt,
+                    "stream": False
+                }
+                response = requests.post(url, json=data)
+                response_json = response.json()
+                value = response_json.get('response')
+                print(value)
+                for i in value.split("\n"):
+                    if (i == "0") or (i == "0 ") or (i == "1") or (i == "1 "):
+                        a.append(i[0])
+                    elif (i == "") or (i == " ") or (i == "\n"):
+                        aaaaaaaaaaa=1
+                    else:
+                        a.append("-")
+            while len(a) < len(items):
+                a.append("-")
+            while len(a) > len(items):
+                try:
+                    a.pop(a.index("-"))
+                except:
+                    a.pop(-1)
             df['СИЗ'] = a
             output = BytesIO()
             df.to_excel(output, index=False)
@@ -85,7 +81,7 @@ async def work_with_file(bot, message, file_name, downloaded_file, work_type):
             return output
         elif file_name.endswith('.xlsx') and work_type == 'use_regexp':
             df = pd.read_excel(BytesIO(downloaded_file))
-            df['Размеры'] = df.iloc[:, 0].apply(lambda x: ' '.join(re.findall(r'\d+', str(x))))
+            #df['Размеры'] = df.iloc[:, 0].apply(lambda x: ' '.join(re.findall(r'\d+', str(x))))
             output = BytesIO()
             df.to_excel(output, index=False)
             output.seek(0)
